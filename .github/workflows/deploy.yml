@@ -3,7 +3,7 @@ name: Full DevOps CI - Local Docker, Tunnel, Integration
 on:
   push:
     branches:
-      - "**"
+      - "main"
 
 jobs:
   build-test-deploy:
