@@ -3,7 +3,7 @@ name: Full DevOps CI - Local Docker, Tunnel, Integration
 on:
   push:
     branches:
-      - "**"
+      - "main"
 
 jobs:
   build-test-deploy:
@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: ☕ Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "17"
@@ -24,6 +24,18 @@ jobs:
 
       - name: 🛠️ Gradle Clean Build (skip unit tests)
         run: ./gradlew clean build -x test
+        env:
+          ORG_GRADLE_JAVA_HOME: ""
+
+      - name: ♻️ Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: 📤 Upload Build Artifact (JAR)
         uses: actions/upload-artifact@v4
