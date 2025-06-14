@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    container_name: metrics-reporter
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/div
+      SPRING_DATASOURCE_USERNAME: div
+      SPRING_DATASOURCE_PASSWORD: div
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
+  db:
+    image: postgres:15
+    container_name: div
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: div
+      POSTGRES_USER: div
+      POSTGRES_PASSWORD: div
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

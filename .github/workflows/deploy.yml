@@ -1,0 +1,65 @@
+name: Full DevOps CI - Local Docker, Tunnel, Integration
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: 🎛️ Grant Gradle Permission
+        run: chmod +x gradlew
+
+      - name: 🛠️ Gradle Clean Build (skip unit tests)
+        run: ./gradlew clean build -x test
+
+      - name: 📤 Upload Build Artifact (JAR)
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics-reporter-jar
+          path: build/libs/*.jar
+
+      - name: 🐳 Docker Compose Build and Up
+        run: |
+          docker-compose down
+          docker-compose up --build -d
+
+      - name: ⏳ Wait for containers to stabilize
+        run: sleep 15
+
+      - name: 📋 Print Docker Compose Logs
+        run: docker-compose logs --tail=100
+
+      - name: 🧪 Run Integration Tests
+        run: |
+          echo "Running sample integration test..."
+          curl --fail http://localhost:8080/webhook/github || (echo "Service not up!" && exit 1)
+
+      # OPTIONAL: Create secure tunnel to localhost using Loophole or Cloudflare
+      # Uncomment one of the following blocks and store secret/token in GitHub secrets
+
+      # - name: 🌐 Setup Loophole tunnel (optional)
+      #   run: |
+      #     curl -Lo loophole https://github.com/loophole/cli/releases/latest/download/loophole-linux-amd64
+      #     chmod +x loophole
+      #     ./loophole http 8080 --hostname ${{ secrets.LOOPHOLE_SUBDOMAIN }}.loophole.site --https --disable-dashboard &
+      #     sleep 10
+
+      # - name: 🌐 Setup Cloudflare Tunnel (optional)
+      #   run: |
+      #     curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+      #     chmod +x cloudflared
+      #     ./cloudflared tunnel --url http://localhost:8080 &
+      #     sleep 10
