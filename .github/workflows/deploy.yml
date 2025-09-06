@@ -22,11 +22,6 @@ jobs:
       - name: 🎛️ Grant Gradle Permission
         run: chmod +x gradlew
 
-      - name: 🛠️ Gradle Clean Build (skip unit tests)
-        run: ./gradlew clean build -x test
-        env:
-          ORG_GRADLE_JAVA_HOME: ""
-
       - name: ♻️ Cache Gradle
         uses: actions/cache@v4
         with:
@@ -37,6 +32,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: 🛠️ Gradle Clean Build (skip unit tests)
+        run: ./gradlew clean build -x test
+
       - name: 📤 Upload Build Artifact (JAR)
         uses: actions/upload-artifact@v4
         with:
@@ -45,14 +43,14 @@ jobs:
 
       - name: 🐳 Docker Compose Build and Up
         run: |
-          docker-compose down
-          docker-compose up --build -d
+          docker compose down
+          docker compose up --build -d
 
       - name: ⏳ Wait for containers to stabilize
         run: sleep 15
 
       - name: 📋 Print Docker Compose Logs
-        run: docker-compose logs --tail=100
+        run: docker compose logs --tail=100
 
       - name: 🧪 Run Integration Tests
         run: |
