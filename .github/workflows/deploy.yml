@@ -45,8 +45,8 @@ jobs:
 
       - name: 🐳 Docker Compose Build and Up
         run: |
-          docker-compose down
-          docker-compose up --build -d
+          run: docker compose down
+          docker compose up --build -d
 
       - name: ⏳ Wait for containers to stabilize
         run: sleep 15
