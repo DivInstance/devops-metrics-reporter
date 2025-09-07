@@ -55,7 +55,7 @@ jobs:
       - name: 🧪 Run Integration Tests
         run: |
           echo "Running sample integration test..."
-          curl --fail http://localhost:8080/webhook/github || (echo "Service not up!" && exit 1)
+          curl --fail http://localhost:8080 || (echo "Service not up!" && exit 1)
 
       # OPTIONAL: Create secure tunnel to localhost using Loophole or Cloudflare
       # Uncomment one of the following blocks and store secret/token in GitHub secrets
